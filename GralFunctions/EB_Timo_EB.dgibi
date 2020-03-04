@@ -1,0 +1,175 @@
+
+************************************************************************
+* Section : Mecanique Dynamique
+************************************************************************
+* V 05.06.2019
+********************************************************************
+*                                                                    *
+*  Mots-clés : Vibrations, calcul modal, precontrainte, poutre, 3D   *
+*                                                                    *
+*  CALCUL DES FREQUENCES D UNE POUTRE EN FLEXION ENCASTREE-LIBRE     *
+*  SOUMISE A UNE EFFORT DE TRACTION DE 150 N                         *
+*  (HYP. DE TIMOSHENSKO et Bernoulli)                                * 
+*                                                                    *
+*  auteur : X Delaune                                                *
+*   Modifié par Carolina FRANCO ARIZA                                                                 *
+**********************************************************************
+*
+opti echo 0 ;
+OPTI TRAC X;
+
+************************************
+*   Caracteristiques du systeme    *
+************************************
+*
+*--- Materiau
+Rhostru = 2.3E-15;
+Youstru = 0.03;
+
+*
+*--- Dimensions du crayon
+N=NbN;
+lw=3000.;
+ni=N*lw;
+Lstru = ni;
+NustE=0.2;
+*
+
+lambda = 1.2;
+*
+
+Secr1 = Sect1/lambda;
+
+*
+*
+**************************************
+*         Maillage du systeme        *
+**************************************
+
+OPTI 'DIME' 3 'ELEM' 'SEG2' ;
+*
+PA = 0.      0. 0.;
+PB = (Lstru) 0. 0.;
+L1 = PA D NbN PB;
+
+*TRAC (L1) 'TITR' '[2] STRCUTURAL MODEL';
+*
+*
+Modl1 = Mode L1 MECANIQUE ELASTIQUE ISOTROPE TIMO;
+Matr1 = Mate Modl1 Youn Youstru Nu Nustru Rho Rhostru ;
+Cara1 = Cara Modl1 'SECT' Sect1 'INRY' Iy 'INRZ' Iz
+                   'SECY' Secr1 'SECZ' Secr1 'TORS' (Iz+Iy);
+Matr1 = Matr1 et Cara1;
+
+Modl2 = Mode L1 MECANIQUE ELASTIQUE ISOTROPE POUT;
+Matr2 = Mate Modl2 Youn Youstru Nu NustE Rho Rhostru ;
+Cara2 = Cara Modl2 'SECT' Sect1 'INRY' Iy 'INRZ' Iz
+                   'SECY' Secr1 'SECZ' Secr1 'TORS' (Iz+Iy);
+Matr2 = Matr2 et Cara2;
+*
+*
+**************************************
+*   Masses, Rigidites ... du systeme *
+**************************************
+*
+*--- Masse
+Mstru = Masse Modl1 Matr1;
+Mstru2 = Masse Modl2 Matr2;
+*
+*--- Raideur structurale
+Ks = Rigi Modl1 Matr1;
+Ks2 = Rigi Modl2 Matr2;
+*
+*--- Conditions aux limites 
+* Cl1 = Bloq DEPL ROTA PA;
+Cl1 = Bloq UX UY RY RZ PA;
+Cl2 = Bloq UZ RX L1;
+*
+Kstru = Ks et Cl1 et Cl2 ;
+Kstru2 = Ks2 et Cl1 et Cl2 ;
+*
+
+*****************************************
+*             Analyse modale            *
+*****************************************
+OPTI EPSI LINEAIRE;
+
+* Plage de frequence analyse modale
+* ---------------------------------
+fmin = 0.01;
+fmax = 40;
+
+* Analyse modale
+* --------------
+
+Bast = VIBR INTERVALLE fmin fmax BASSE 5 Kstru Mstru IMPR TBAS; ;
+Bast2 = VIBR INTERVALLE fmin fmax BASSE 5 Kstru2 Mstru2 IMPR TBAS; ;
+
+* Recuperation des infos sur les modes
+* ------------------------------------
+VAR1 = Bast . 'MODES';
+VAR2 = Bast2 . 'MODES';
+VAR0 = VAR1. 'MAILLAGE';
+FREQ1=table; DEMO1=table;
+FREQ2=table;
+
+nmod = (DIME VAR1) - 2 ;
+nmoE = (DIME VAR2) - 2 ;
+
+REPE BOUC nmod;
+     nummod1 = VAR1 . &BOUC . NUMERO_MODE;
+
+* Recuperation de la frequence propre
+* -----------------------------------
+     FREQ1.&BOUC = VAR1 . &BOUC . FREQUENCE;
+
+* Trace de la deforme modale
+* --------------------------
+     DEMO1. &BOUC = VAR1 . &BOUC . DEFORMEE_MODALE;
+     DEF1  = DEFO VAR0 DEMO1. &BOUC roug;
+     DEF1B = DEFO VAR0 DEMO1. &BOUC 0.0 ;
+
+FIN BOUC;
+
+REPE BOUC nmoE;
+     nummod1 = VAR2 . &BOUC . NUMERO_MODE;
+
+* Recuperation de la frequence propre
+* -----------------------------------
+
+     FREQ2.&BOUC = VAR2 . &BOUC . FREQUENCE;
+* Trace de la deforme modale
+* --------------------------
+     DEMO1. &BOUC = VAR2. &BOUC . DEFORMEE_MODALE;
+     DEF1  = DEFO VAR0 DEMO1. &BOUC roug;
+     DEF1B = DEFO VAR0 DEMO1. &BOUC 0.0 ;
+
+FIN BOUC;
+
+
+OPTI 'SORT' 'FREQT1.inp';
+SORT 'CHAI' FREQ1.1;
+OPTI 'SORT' 'FREQT2.inp';
+SORT 'CHAI' FREQ1.2;
+OPTI 'SORT' 'FREQT3.inp';
+SORT 'CHAI' FREQ1.3;
+
+OPTI 'SORT' 'FREQE1.inp';
+SORT 'CHAI' FREQ2.1;
+OPTI 'SORT' 'FREQE2.inp';
+SORT 'CHAI' FREQ2.2;
+OPTI 'SORT' 'FREQE3.inp';
+SORT 'CHAI' FREQ2.3;
+
+LIST FREQ1;
+LIST FREQ2;
+fin;
+
+ 
+
+ 
+
+ 
+
+ 
+
