@@ -17,31 +17,31 @@ Input
 %% Start counting TIME
 tic
 %% HPDM: Lam, Ki, Kgb, K Estimation
-tic
+
 MacroParameters
-toc
+
 %% HPDM: NATURAL FREQUENCY COMPUTATIONS
-tic 
+
 FrequencyEstimation
-toc
+
 %% --------------------------------------------------------------------------
 % MODAL DEFORMATION : Kinematic variables
 % --------------------------------------------------------------------------
-tic
+
 KinematicVariables
-toc
+
 %% --------------------------------------------------------------------------
 %NODAL ROTATION FROM HYBRID METHOD: ANALYTICAL + NUMERICAL 
 % --------------------------------------------------------------------------
-tic
+
 [Theta_numuA, Theta_numuU] = ExCastemTheta(aw1,aw2,af1,af2,nw); %Unit Rotation from static analysis 
 [UY_numuA, UY_numuU] =  ExCastemDisp(nw); %Unit Vertical displacement from static analysis 
-toc
+
 %% --------------------------------------------------------------------------
 % Internal FORCES (ANALYTICAL RESULTS)
 % --------------------------------------------------------------------------
-tic
+
 InForces
-toc
+
 %% End counting TIME
 toc
