@@ -25,7 +25,7 @@ end
 % Frequency estimation
 % --------------------------------------------------------------------------
 
-omega=0:0.4:10000;
+omega=(2*pi()*(0.8/N+0.006)):(2*pi()*(0.8/N+0.006)):30*100*pi()/N;
 deter=zeros(length(omega),1); 
 frange=cell(d,1,1);
 % Scale Factor
@@ -49,23 +49,21 @@ B3=2*sqrt(-p/3)*cos(eqn1)+(1+gama)/(3*C*gama);
 b1=sqrt(-B1);
 b2=sqrt(B2);
 b3=sqrt(B3);
-deter(i)=cos(pi*b1/2)*(B1^2-B2^2)*(B1^2-B3^2)*(2*B2*B3/(cosh(pi*b2/2)*cosh(pi*b3/2))+tanh(pi*b2/2)*tanh(pi*b3/2)*b2*b3*(B2+B3))+(B2^2-B1^2)*(B2^2-B3^2)*(2*B1*B3/(cosh(pi*b3/2))-sin(pi*b1/2)*tanh(pi*b3/2)*b1*b3*(B1+B3))+(B3^2-B1^2)*(B3^2-B2^2)*(2*B1*B2/(cosh(pi*b2/2))-sin(pi*b1/2)*tanh(pi*b2/2)*b1*b2*(B1+B2))-cos(pi*b1/2)*(B1^2*(B2^2-B3^2)^2+B3^2*(B2^2-B1^2)^2+B2^2*(B1^2-B3^2)^2);
+deter(i)=(cos(pi*b1/2)*(B1^2-B2^2)*(B1^2-B3^2)*(2*B2*B3/(cosh(pi*b2/2)*cosh(pi*b3/2))+tanh(pi*b2/2)*tanh(pi*b3/2)*b2*b3*(B2+B3))+(B2^2-B1^2)*(B2^2-B3^2)*(2*B1*B3/(cosh(pi*b3/2))-sin(pi*b1/2)*tanh(pi*b3/2)*b1*b3*(B1+B3))+(B3^2-B1^2)*(B3^2-B2^2)*(2*B1*B2/(cosh(pi*b2/2))-sin(pi*b1/2)*tanh(pi*b2/2)*b1*b2*(B1+B2))-cos(pi*b1/2)*(B1^2*(B2^2-B3^2)^2+B3^2*(B2^2-B1^2)^2+B2^2*(B1^2-B3^2)^2));
 end
-deter=real(deter);
+idx = imag(double(deter)) == 0;
+deter = deter(idx);
+deter=real(deter); %Taking the real number
+%Looking for proper natural frequency range 
 n=0;
-for i=1:length(deter)
-    
-    if deter(i)*deter(i+1)<0
+
+for i=1:length(deter)-1
+   if deter(i)*deter(i+1)<0
         frange{i}=[omega(i)^2 omega(i+1)^2];
         n=n+1;
         
-        if frange{i}==[0 0.1600]
-         frange{i}=[];
-         n=n-1;
-        end
-        
         switch n
-            case d
+            case 10
                 break
         end
     end
@@ -87,9 +85,9 @@ b1=sqrt(-B1);
 b2=sqrt(B2);
 b3=sqrt(B3);
 
-eqn=cos(pi*b1/2)*(B1^2-B2^2)*(B1^2-B3^2)*(2*B2*B3/(cosh(pi*b2/2)*cosh(pi*b3/2))+tanh(pi*b2/2)*tanh(pi*b3/2)*b2*b3*(B2+B3))+(B2^2-B1^2)*(B2^2-B3^2)*(2*B1*B3/(cosh(pi*b3/2))-sin(pi*b1/2)*tanh(pi*b3/2)*b1*b3*(B1+B3))+(B3^2-B1^2)*(B3^2-B2^2)*(2*B1*B2/(cosh(pi*b2/2))-sin(pi*b1/2)*tanh(pi*b2/2)*b1*b2*(B1+B2))-cos(pi*b1/2)*(B1^2*(B2^2-B3^2)^2+B3^2*(B2^2-B1^2)^2+B2^2*(B1^2-B3^2)^2)==0;
+eqn=(cos(pi*b1/2)*(B1^2-B2^2)*(B1^2-B3^2)*(2*B2*B3/(cosh(pi*b2/2)*cosh(pi*b3/2))+tanh(pi*b2/2)*tanh(pi*b3/2)*b2*b3*(B2+B3))+(B2^2-B1^2)*(B2^2-B3^2)*(2*B1*B3/(cosh(pi*b3/2))-sin(pi*b1/2)*tanh(pi*b3/2)*b1*b3*(B1+B3))+(B3^2-B1^2)*(B3^2-B2^2)*(2*B1*B2/(cosh(pi*b2/2))-sin(pi*b1/2)*tanh(pi*b2/2)*b1*b2*(B1+B2))-cos(pi*b1/2)*(B1^2*(B2^2-B3^2)^2+B3^2*(B2^2-B1^2)^2+B2^2*(B1^2-B3^2)^2))==0;
 
-for n=1:d
+for n=1:length(frange)
 omegastor=vpasolve(eqn,omegasq,[frange{n}(1),frange{n}(2)],'random',true);
 if isempty(omegastor)
 omegastor=0;
@@ -101,11 +99,14 @@ wn=sort(omegar);
 Ndecimals = 5 ;
 fround = 10.^Ndecimals; 
 wn = round(fround*wn)/fround;
-if wn(1)==0
-wn(1) = [];
-d=d-1;
+inisize_wn=length(wn);
+omesqu=wn;
+for i=1:length(wn)
+if wn(i)==0
+omesqu(i) = [];
 end
-
+end
+wn=omesqu(1:4);
 
     for s=1:d
     f_natural(s)=sqrt(wn(s))/(2*pi);
