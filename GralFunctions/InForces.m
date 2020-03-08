@@ -1,7 +1,8 @@
 %% --------------------------------------------------------------------------
 % Internal Forces (ANALYTICAL RESULTS)
 % --------------------------------------------------------------------------
-omega=sqrt(wn);
+Omega_graph=omega; %Saving omega for graph in plot function
+omega=sqrt(wn); % natural frequencies
 xd=x;
  for k=1:length(E(1,:))
      for g=1:length(x)
@@ -20,8 +21,8 @@ lfac=zeros(nw,1);
         
  end
 [thetaa, thetan, nodal_rot]=rotation(af,aw,hf,hw,lf,lw,Ew,Uy,Ux1, xd,alpha,pe,omega,Theta_numuA,Theta_numuU,L ,length(aw),length(af));
-[Na, T, M, M_in,M_in1, Tr,M_global,M_global1]=Internalforces(af,aw,hf,hw,lf,lw,Ew,Ux,Uy,Ux1,Ux2,Ux3, xd,alpha,alpha1,alpha2,pe,omega,nodal_rot,L,length(aw),length(af));
-
+[Na, T, M]=Internalforces(af,aw,hf,hw,lf,lw,Ew,Ux,Uy,Ux1,Ux2,Ux3, xd,alpha,alpha1,alpha2,pe,omega,nodal_rot,L,length(aw),length(af));
+ForcesHPDM
   for h=1:length(omega)
      for i=1:nw
      for g=1:length(x)

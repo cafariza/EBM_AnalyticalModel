@@ -1,4 +1,4 @@
-function [N, T, M, M_in,M_in1, Tr,M_global,M_global1]=Internalforces(af,aw,hf,hw,lf,lw,Ew,Ux,Uy,Ux1,Ux2,Ux3, xd,alpha,alpha1,alpha2,pe,omega,nodal_rot,L, varargin)
+function [N, T, M]=Internalforces(af,aw,hf,hw,lf,lw,Ew,Ux,Uy,Ux1,Ux2,Ux3, xd,alpha,alpha1,alpha2,pe,omega,nodal_rot,L, varargin)
 
 %This function works for structures of Any number of frames. It computes
 %the shear force and the bending moment of each structural member
@@ -74,23 +74,23 @@ Tw(g,i)=10^6*Ew*Iw(i)/(l_T(i,j))^3*(Ux(g,j)*(cosh(l_Tas(i,j))*sin(l_Tas(i,j))+si
         Mw(g,i)=(Mw(g-1,i));
     end
 
-Mi(g,i)=-Ki*Ux2(g,j)*10^6/(L^2);
-Mi_1(g,i)=-Ki*Ux3(g,j)*10^6/(L^3);
-Trs(g,i)=-K*(Ux1(g,j)/L-alpha(g,j))*10^6;
-Mglobal(g,i)=-Kgb*alpha1(g,j)*10^6;
-Mglobal1(g,i)=-Kgb*alpha2(g,j)*10^6;
+% Mi(g,i)=-Ki*Ux2(g,j)*10^6/(L^2);
+% Mi_1(g,i)=-Ki*Ux3(g,j)*10^6/(L^3);
+% Trs(g,i)=-K*(Ux1(g,j)/L-alpha(g,j))*10^6;
+% Mglobal(g,i)=-Kgb*alpha1(g,j)*10^6;
+% Mglobal1(g,i)=-Kgb*alpha2(g,j)*10^6;
 end 
 end
 % Forces in the element
 N{j}=[Nw];% Axial force
 T{j}=[Tw];% Shear force
 M{j}=[Mw];% Flexural moment
-
-% From equilibrium equations
-M_in{j}=Mi; % Inner bending moment
-M_in1{j}=Mi_1;% First derivative inner bending moment
-M_global{j}=Mglobal; % Global bending moment
-M_global1{j}=Mglobal1; % First derivative global bending moment
-Tr{j}=Trs; % Shear force
+% 
+% % From equilibrium equations
+% M_in{j}=Mi; % Inner bending moment
+% M_in1{j}=Mi_1;% First derivative inner bending moment
+% M_global{j}=Mglobal; % Global bending moment
+% M_global1{j}=Mglobal1; % First derivative global bending moment
+% Tr{j}=Trs; %  Shear force
 end
 end
